@@ -65,4 +65,4 @@
 
 - Map edge cases with new lists of text files
 - Create unit and end-to-end tests (latter might be easier?)
-- Consider how concurrency could help
+- Consider how concurrency could help, and how to implement it

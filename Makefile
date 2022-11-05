@@ -1,0 +1,6 @@
+build:
+	go build -o . ./...
+test:
+	go test ./...
+run:
+	go run cmd/cli/main.go

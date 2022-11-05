@@ -1,8 +1,13 @@
-package internal
+package auctionhouse
 
 import (
 	"fmt"
 	"strings"
+
+	i "github.com/14jdelap/thought_machine_take_home/internal"
+	b "github.com/14jdelap/thought_machine_take_home/internal/bid_items"
+	h "github.com/14jdelap/thought_machine_take_home/internal/heartbeat"
+	l "github.com/14jdelap/thought_machine_take_home/internal/listing_item"
 )
 
 type auctionResult struct {
@@ -26,40 +31,36 @@ type bid struct {
 
 type AuctionHouse struct {
 	list               []row
-	itemIds            map[string]bool
 	itemAuctionResults map[string]*auctionResult
-	malformedRows      []string
 }
 
 type row interface {
-	ValidateAndAssign([]string) error
+	ValidateAndAssign([]string) *i.RowParsingError
 }
 
-func (a *AuctionHouse) ProcessInputs(inputs []byte) {
-	splitInputs := strings.Split(string(inputs), "\n")
-
-	for _, row := range splitInputs {
+func (a *AuctionHouse) ProcessInputs(inputs []string) {
+	for _, row := range inputs {
 		splitRow := strings.Split(row, "|")
 		rowLength := len(splitRow)
 
 		if rowLength == 1 {
 			// Can these 2 rows collapse into 1?
-			Heartbeat := &Heartbeat{}
-			err := Heartbeat.ValidateAndAssign(splitRow)
+			heartbeat := &h.Heartbeat{}
+			err := heartbeat.ValidateAndAssign(splitRow)
 			if err == nil {
-				a.list = append(a.list, Heartbeat)
+				a.list = append(a.list, heartbeat)
 			}
 		} else if rowLength == 5 {
-			BidItem := &BidItem{}
-			err := BidItem.ValidateAndAssign(splitRow)
+			bidItem := &b.BidItem{}
+			err := bidItem.ValidateAndAssign(splitRow)
 			if err == nil {
-				a.list = append(a.list, BidItem)
+				a.list = append(a.list, bidItem)
 			}
 		} else if rowLength == 6 {
-			ListingItem := &ListingItem{}
-			err := ListingItem.ValidateAndAssign(splitRow)
+			listingItem := &l.ListingItem{}
+			err := listingItem.ValidateAndAssign(splitRow)
 			if err == nil {
-				a.list = append(a.list, ListingItem)
+				a.list = append(a.list, listingItem)
 			}
 		}
 	}
@@ -69,34 +70,34 @@ func (a *AuctionHouse) HoldAuction() {
 	a.itemAuctionResults = make(map[string]*auctionResult)
 	for _, row := range a.list {
 		switch row.(type) {
-		case *ListingItem:
-			a.listItem(row.(*ListingItem))
-		case *BidItem:
-			a.bidForItem(row.(*BidItem))
+		case *l.ListingItem:
+			a.listItem(row.(*l.ListingItem))
+		case *b.BidItem:
+			a.bidForItem(row.(*b.BidItem))
 		}
 	}
 
 	a.reviewSales()
 }
 
-func (a *AuctionHouse) listItem(row *ListingItem) {
-	_, present := a.itemAuctionResults[row.item]
+func (a *AuctionHouse) listItem(row *l.ListingItem) {
+	_, present := a.itemAuctionResults[row.Item]
 
 	if present {
 		return
 	}
 
-	a.itemAuctionResults[row.item] = &auctionResult{
-		closeTime:    row.closeTime,
-		item:         row.item,
-		reservePrice: row.reservePrice,
+	a.itemAuctionResults[row.Item] = &auctionResult{
+		closeTime:    row.CloseTime,
+		item:         row.Item,
+		reservePrice: row.ReservePrice,
 	}
 }
 
-func (a *AuctionHouse) bidForItem(row *BidItem) {
-	currentBid := bid{row.userId, row.bidAmount, row.timestamp}
+func (a *AuctionHouse) bidForItem(row *b.BidItem) {
+	currentBid := bid{row.UserId, row.BidAmount, row.Timestamp}
 
-	auctionItem, present := a.itemAuctionResults[row.item]
+	auctionItem, present := a.itemAuctionResults[row.Item]
 
 	// Do not count bid if the item hasn't been listed
 	if !present {
