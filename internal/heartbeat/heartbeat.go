@@ -11,6 +11,8 @@ type Heartbeat struct {
 	Timestamp int
 }
 
+// ValidateAndAssign checks if the splitRow has valid inputs for a Heartbeat,
+// and if valid mutates all of the instance's fields and returns nil.
 func (h *Heartbeat) ValidateAndAssign(splitRow []string) *i.RowParsingError {
 	timestamp, err := strconv.Atoi(splitRow[0])
 	if err != nil {

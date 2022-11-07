@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/14jdelap/thought_machine_take_home/internal"
+	i "github.com/14jdelap/thought_machine_take_home/internal"
 )
 
 func TestValidateAndAssign(t *testing.T) {
@@ -13,14 +13,12 @@ func TestValidateAndAssign(t *testing.T) {
 	var tests = []struct {
 		description string
 		splitRow    []string
-		want        *internal.RowParsingError
+		want        *i.RowParsingError
 	}{
-		// Happy paths
 		{"Happy path: expected output", []string{"12"}, nil},
 		{"Happy path: unexpected but valid output", []string{"-37"}, nil},
-		// Unhappy paths
-		{"Unhappy path: string timestamp", []string{"wrong timestamp"}, &internal.RowParsingError{"timestamp", reflect.TypeOf(h)}},
-		{"Unhappy path: empty timestamp", []string{""}, &internal.RowParsingError{"timestamp", reflect.TypeOf(h)}},
+		{"Unhappy path: string timestamp", []string{"wrong timestamp"}, &i.RowParsingError{"timestamp", reflect.TypeOf(h)}},
+		{"Unhappy path: empty timestamp", []string{""}, &i.RowParsingError{"timestamp", reflect.TypeOf(h)}},
 	}
 
 	for _, tt := range tests {

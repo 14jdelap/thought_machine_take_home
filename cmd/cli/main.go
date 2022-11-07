@@ -7,7 +7,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	a "github.com/14jdelap/thought_machine_take_home/internal/auction_house"
+	a "github.com/14jdelap/thought_machine_take_home/internal/auction"
 )
 
 func main() {
@@ -22,8 +22,7 @@ func main() {
 
 	splitInputs := strings.Split(string(content), "\n")
 
-	house := &a.AuctionHouse{}
-	house.ProcessInputs(splitInputs)
-	house.HoldAuction()
-	house.AnnounceResults()
+	rows := a.ProcessInputs(splitInputs)
+	auctionResults := a.HoldAuction(rows)
+	a.AnnounceResults(auctionResults)
 }

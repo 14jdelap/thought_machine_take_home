@@ -10,12 +10,14 @@ import (
 
 type BidItem struct {
 	Timestamp int
-	UserId    int
+	UserId    string
 	Action    string
 	Item      string
 	BidAmount float64
 }
 
+// ValidateAndAssign checks if the splitRow has valid inputs for a BidItem,
+// and if valid mutates all of the instance's fields and returns nil.
 func (b *BidItem) ValidateAndAssign(splitRow []string) *i.RowParsingError {
 	timestamp, err := strconv.Atoi(splitRow[0])
 	if err != nil {
@@ -23,11 +25,12 @@ func (b *BidItem) ValidateAndAssign(splitRow []string) *i.RowParsingError {
 	}
 	b.Timestamp = timestamp
 
-	userId, err := strconv.Atoi(splitRow[1])
+	_, err = strconv.Atoi(splitRow[1])
 	if err != nil {
 		return &i.RowParsingError{"userId", reflect.TypeOf(b)}
 	}
-	b.UserId = userId
+	// Return userId as string to use "" zero value
+	b.UserId = splitRow[1]
 
 	action := strings.ToLower(splitRow[2])
 	if action != "bid" {
